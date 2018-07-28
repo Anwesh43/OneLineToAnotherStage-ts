@@ -5,6 +5,10 @@ class OneLineToAnotherStage {
 
     context : CanvasRenderingContext2D
 
+    lott : LinkedOTT = new LinkedOTT()
+
+    animator : Animator = new Animator()
+
     constructor() {
         this.initCanvas()
     }
@@ -19,11 +23,19 @@ class OneLineToAnotherStage {
     render() {
         this.context.fillStyle = '#212121'
         this.context.fillRect(0, 0, w, h)
+        this.lott.draw(this.context)
     }
 
     handleTap() {
         this.canvas.onmousedown = () => {
-
+            this.lott.startUpdating(() => {
+                this.animator.start(() => {
+                    this.render()
+                    this.lott.update(() => {
+                        this.animator.stop()
+                    })
+                })
+            })
         }
     }
 
