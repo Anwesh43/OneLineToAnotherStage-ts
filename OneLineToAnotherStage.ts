@@ -1,4 +1,4 @@
-const w : number = window.innerWidth, h = window.innerHeight
+const w : number = window.innerWidth, h = window.innerHeight, nodes : number = 5
 class OneLineToAnotherStage {
 
     canvas : HTMLCanvasElement = document.createElement('canvas')
@@ -80,5 +80,83 @@ class Animator {
             this.animated = false
             clearInterval(this.interval)
         }
+    }
+}
+
+class OTTNode {
+
+    prev : OTTNode
+
+    next : OTTNode
+
+    state : State =  new State()
+
+    constructor(private i : number) {
+        this.addNeighbor()
+    }
+
+    addNeighbor() {
+        if (this.i < nodes - 1) {
+            this.next = new OTTNode(this.i + 1)
+            this.next.prev = this
+        }
+    }
+    update(stopcb : Function) {
+        this.state.update(stopcb)
+    }
+
+    startUpdating(startcb : Function) {
+        this.state.startUpdating(startcb)
+    }
+
+    drawFirstHorizontalLine(context : CanvasRenderingContext2D, size : number, sc1 : number) {
+        const w : number = size/2 * (1 - sc1)
+        context.beginPath()
+        context.moveTo(-w, 0)
+        context.lineTo(w, 0)
+        context.stroke()
+    }
+
+    drawSecondHorizontalLine(context : CanvasRenderingContext2D, size : number, y : number, sc2 : number) {
+        const w : number = size/2 * sc2
+        context.beginPath()
+        context.moveTo(-w, 0)
+        context.lineTo(w , 0)
+        context.stroke()
+    }
+
+    drawVerticalLine(context : CanvasRenderingContext2D, size : number, sc1 : number, sc2 : number) {
+        context.beginPath()
+        context.moveTo(0, size * sc2)
+        context.lineTo(0, size * sc1)
+        context.stroke()
+    }
+
+    draw(context : CanvasRenderingContext2D) {
+        context.strokeStyle = '#388E3C'
+        context.lineWidth = Math.min(w, h) / 50
+        context.lineCap = 'round'
+        const gap : number = h / nodes
+        const wSize : number = (w / 3)
+        const sc1 : number = Math.min(0.5, this.state.scale) * 2
+        const sc2 : number = Math.min(0.5, Math.max(0, this.state.scale)) * 2
+        context.save()
+        context.translate(w/2, gap * this.i + gap/2)
+        this.drawFirstHorizontalLine(context, wSize, sc1)
+        this.drawVerticalLine(context, wSize, sc1, sc2)
+        this.drawSecondHorizontalLine(context, wSize, gap, sc2)
+        context.restore()
+    }
+
+    getNext(dir : number, cb : Function) {
+        var curr : OTTNode = this.prev
+        if (dir == 1) {
+            curr = this.next
+        }
+        if (curr) {
+            return curr
+        }
+        cb()
+        return this 
     }
 }
