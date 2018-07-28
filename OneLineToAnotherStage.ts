@@ -83,7 +83,7 @@ class Animator {
             this.animated = true
             this.interval = setInterval(() => {
                 cb()
-            }, 50)
+            }, 75)
         }
     }
 
@@ -132,8 +132,8 @@ class OTTNode {
     drawSecondHorizontalLine(context : CanvasRenderingContext2D, size : number, y : number, sc2 : number) {
         const w : number = size/2 * sc2
         context.beginPath()
-        context.moveTo(-w, 0)
-        context.lineTo(w , 0)
+        context.moveTo(-w, y)
+        context.lineTo(w , y)
         context.stroke()
     }
 
@@ -148,15 +148,20 @@ class OTTNode {
         context.strokeStyle = '#388E3C'
         context.lineWidth = Math.min(w, h) / 50
         context.lineCap = 'round'
-        const gap : number = h / nodes
-        const wSize : number = (w / 3)
+        const gap : number = h / (nodes + 2)
         const sc1 : number = Math.min(0.5, this.state.scale) * 2
-        const sc2 : number = Math.min(0.5, Math.max(0, this.state.scale)) * 2
+        const sc2 : number = Math.min(0.5, Math.max(0, this.state.scale - 0.5)) * 2
         context.save()
         context.translate(w/2, gap * this.i + gap/2)
-        this.drawFirstHorizontalLine(context, wSize, sc1)
-        this.drawVerticalLine(context, wSize, sc1, sc2)
-        this.drawSecondHorizontalLine(context, wSize, gap, sc2)
+        if (sc1 < 1) {
+            this.drawFirstHorizontalLine(context, gap, sc1)
+        }
+        if (sc2 < 1) {
+            this.drawVerticalLine(context, gap, sc1, sc2)
+        }
+        if (sc2 != 0) {
+            this.drawSecondHorizontalLine(context, gap, gap, sc2)
+        }
         context.restore()
     }
 
